@@ -1,0 +1,57 @@
+# Put all your resources under `resources:`. For each resource, you need:
+# - The type of resource. In this example, the type is a Compute VM instance.
+# - An internal name for the resource.
+# - The properties for the resource. In this example, for VM instances, you add
+#   the machine type, a boot disk, network information, and so on.
+#
+# For a list of supported resources,
+# see https://cloud.google.com/deployment-manager/docs/configuration/supported-resource-types.
+resources:
+- type: compute.v1.instance
+  name: nasa-apod-client
+  properties:
+    labels:
+      container-vm: cos-stable-97-16919-103-28
+    metadata:
+      items:
+        - key: gce-container-declaration
+          value: |
+            spec:
+              containers:
+              - image: gcr.io/nasa-apod-360502/apod-api
+                name: nasa-apod-client
+                securityContext:
+                  privileged: false
+                stdin: false
+                tty: false
+                volumeMounts: []
+              restartPolicy: Always
+              volumes: []
+    tags: 
+      items: 
+        - http-server
+        - https-server
+    serviceAccounts:
+      - email: 444818282464-compute@developer.gserviceaccount.com
+        scopes:
+        - https://www.googleapis.com/auth/devstorage.read_only
+        - https://www.googleapis.com/auth/logging.write
+        - https://www.googleapis.com/auth/monitoring.write
+        - https://www.googleapis.com/auth/pubsub
+        - https://www.googleapis.com/auth/service.management.readonly
+        - https://www.googleapis.com/auth/servicecontrol
+        - https://www.googleapis.com/auth/trace.append
+    zone: us-west1-b
+    machineType: https://www.googleapis.com/compute/v1/projects/nasa-apod-360502/zones/us-west1-b/machineTypes/f1-micro
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-97-16919-103-28
+    networkInterfaces:
+    - network: https://www.googleapis.com/compute/v1/projects/nasa-apod-360502/global/networks/default
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
